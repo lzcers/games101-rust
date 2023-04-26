@@ -57,6 +57,7 @@ impl Rasterizer {
         self.model = model;
     }
     pub fn set_projection(&mut self, projection: Matrix4<f64>) {
+        println!("{}", projection);
         self.projection = projection;
     }
 
@@ -161,19 +162,11 @@ impl Rasterizer {
         let ind = &self.ind_buf[&ind_id.0];
         let mvp = self.model * self.view * self.projection;
         let frame_buf = &mut self.frame_buf;
-
         for i in ind {
             let t = Rasterizer::get_triangle(self.width, self.height, buf, mvp, i);
-            Self::draw_line(
-                self.width,
-                self.height,
-                &Vec3::new(0.0, 0.0, 1.0),
-                &Vec3::new(300.0, 700.0, 1.0),
-                frame_buf,
-            );
-            // Self::draw_line(self.width, self.height, &t.a(), &t.b(), frame_buf);
-            // Self::draw_line(self.width, self.height, &t.b(), &t.c(), frame_buf);
-            // Self::draw_line(self.width, self.height, &t.c(), &t.a(), frame_buf);
+            Self::draw_line(self.width, self.height, &t.a(), &t.b(), frame_buf);
+            Self::draw_line(self.width, self.height, &t.b(), &t.c(), frame_buf);
+            Self::draw_line(self.width, self.height, &t.c(), &t.a(), frame_buf);
         }
     }
 

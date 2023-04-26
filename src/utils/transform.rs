@@ -42,13 +42,13 @@ pub fn get_projection_matrix(
     ]);
 
     // 正交矩阵
-    let t = z_near * (eye_fov / 2.0 * (PI / 180.0)).tan();
+    let t = -z_near.abs() * (eye_fov / 2.0 * (PI / 180.0)).tan();
     let r = aspect_radio * t;
     let l = -r;
     let b = -t;
     let m2 = Matrix4::from_rows(&[
-        RowVector4::new(2.0 / r, 0.0, 0.0, 0.0),
-        RowVector4::new(0.0, 2.0 / t, 0.0, 0.0),
+        RowVector4::new(2.0 / (r - l), 0.0, 0.0, 0.0),
+        RowVector4::new(0.0, 2.0 / (t - b), 0.0, 0.0),
         RowVector4::new(
             0.0,
             0.0,
