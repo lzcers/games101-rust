@@ -17,7 +17,7 @@ pub fn get_view_matrix(eye_pos: Vec3) -> Matrix4<f64> {
 
 #[inline]
 pub fn get_model_matrix(rotation_angle: f64) -> Matrix4<f64> {
-    let (sin, cos) = (rotation_angle * PI / 180.0).sin_cos();
+    let (sin, cos) = rotation_angle.to_radians().sin_cos();
     Matrix4::from_rows(&[
         RowVector4::new(cos, -sin, 0.0, 0.0),
         RowVector4::new(sin, cos, 0.0, 0.0),
@@ -42,7 +42,7 @@ pub fn get_projection_matrix(
     ]);
 
     // 正交矩阵
-    let t = -z_near.abs() * (eye_fov / 2.0 * (PI / 180.0)).tan();
+    let t = -z_near.abs() * (eye_fov / 2.0).to_radians().tan();
     let r = aspect_radio * t;
     let l = -r;
     let b = -t;

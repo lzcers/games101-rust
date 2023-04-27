@@ -57,7 +57,6 @@ impl Rasterizer {
         self.model = model;
     }
     pub fn set_projection(&mut self, projection: Matrix4<f64>) {
-        println!("{}", projection);
         self.projection = projection;
     }
 
@@ -160,7 +159,7 @@ impl Rasterizer {
     pub fn draw(&mut self, pos_id: PosBufId, ind_id: IndBufId, _type: Primitive) {
         let buf = &self.pos_buf[&pos_id.0];
         let ind = &self.ind_buf[&ind_id.0];
-        let mvp = self.model * self.view * self.projection;
+        let mvp = self.projection * self.view * self.model;
         let frame_buf = &mut self.frame_buf;
         for i in ind {
             let t = Rasterizer::get_triangle(self.width, self.height, buf, mvp, i);
