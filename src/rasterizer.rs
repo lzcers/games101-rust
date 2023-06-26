@@ -219,9 +219,21 @@ impl Rasterizer {
         let ca = triangle.a() - triangle.c();
 
         let i = ap.cross(&ab);
-        let j = bp.cross(&bp);
-        let k = cp.cross(&bc);
+        let j = bp.cross(&bc);
+        let k = cp.cross(&ca);
         (i.z > 0.0 && j.z > 0.0 && k.z > 0.0) || (i.z < 0.0 && j.z < 0.0 && k.z < 0.0)
+    }
+
+    pub fn rasterize_wireframe(triangle: &Triangle) {
+        let min_x = triangle.a().x.min(triangle.b().x).min(triangle.c().x) as usize;
+        let min_y = triangle.a().y.min(triangle.b().y).min(triangle.c().y) as usize;
+        let max_x = triangle.a().x.max(triangle.b().x).max(triangle.c().x) as usize;
+        let max_y = triangle.a().y.max(triangle.b().y).max(triangle.c().y) as usize;
+        for x in min_x..=max_x {
+            for y in min_y..=max_y {
+                Self::inside_triangle(x as f64 + 0.5, y as f64 + 0.5, triangle);
+            }
+        }
     }
 }
 
