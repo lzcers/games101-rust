@@ -34,9 +34,9 @@ pub struct Rasterizer {
     model: Matrix4<f64>,
     view: Matrix4<f64>,
     projection: Matrix4<f64>,
-
     ind_buf: HashMap<usize, Vec<Vector3<usize>>>,
     pos_buf: HashMap<usize, Vec<Vec3>>,
+    depth_buf: Vec<f64>,
     next_id: usize,
     pub frame_buf: Vec<Vec3>,
 }
@@ -48,6 +48,7 @@ impl Rasterizer {
         r.height = height;
         r.frame_buf
             .resize((width * height) as usize, Vector3::zeros());
+        r.depth_buf.resize((width * height) as usize, 0.0);
         r
     }
     pub fn set_view(&mut self, view: Matrix4<f64>) {
@@ -224,14 +225,17 @@ impl Rasterizer {
         (i.z > 0.0 && j.z > 0.0 && k.z > 0.0) || (i.z < 0.0 && j.z < 0.0 && k.z < 0.0)
     }
 
-    pub fn rasterize_wireframe(triangle: &Triangle) {
+    pub fn rasterize_triangle(triangle: &Triangle) {
+        // 创建 bounding box
         let min_x = triangle.a().x.min(triangle.b().x).min(triangle.c().x) as usize;
         let min_y = triangle.a().y.min(triangle.b().y).min(triangle.c().y) as usize;
         let max_x = triangle.a().x.max(triangle.b().x).max(triangle.c().x) as usize;
         let max_y = triangle.a().y.max(triangle.b().y).max(triangle.c().y) as usize;
         for x in min_x..=max_x {
             for y in min_y..=max_y {
-                Self::inside_triangle(x as f64 + 0.5, y as f64 + 0.5, triangle);
+                if !Self::inside_triangle(x as f64 + 0.5, y as f64 + 0.5, triangle) {
+                    continue;
+                }
             }
         }
     }
