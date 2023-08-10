@@ -93,6 +93,7 @@ impl Rasterizer {
     }
 
     pub fn clear(&mut self) {}
+
     // 使用 Bresenham's line algorithm 算法绘制直线, 其过程本质是已知两点的直线连续函数，求其离散化的最佳表示
     // https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
     pub fn draw_line(width: u32, height: u32, begin: &Vec3, end: &Vec3, frame_buf: &mut Vec<Vec3>) {

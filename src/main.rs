@@ -1,3 +1,4 @@
+mod camera;
 mod display;
 mod rasterizer;
 mod utils;
@@ -21,7 +22,6 @@ fn main() {
     let ind_id = r.load_indices(&ind);
 
     let mut angle = 0.0;
-    let mut k = 0;
     r.set_model(get_model_matrix(angle));
     r.set_view(get_view_matrix(eye_pos));
     r.set_projection(get_projection_matrix(45.0, 1.0, 0.1, 50.0));
