@@ -2,13 +2,10 @@ mod display;
 mod rasterizer;
 mod utils;
 
+use display::create_window;
 use nalgebra::Vector3;
-use opencv::highgui::{imshow, wait_key};
 use rasterizer::{Primitive, Rasterizer};
-use utils::{
-    frame_buffer2cv_mat, get_model_matrix, get_projection_matrix, get_view_matrix, Triangle,
-};
-type Vec3 = nalgebra::Vector3<f64>;
+use utils::{get_model_matrix, get_projection_matrix, get_view_matrix};
 
 fn main() {
     let mut r = Rasterizer::new(700, 700);
@@ -25,20 +22,9 @@ fn main() {
 
     let mut angle = 0.0;
     let mut k = 0;
-    while k != 27 {
-        r.set_model(get_model_matrix(angle));
-        r.set_view(get_view_matrix(eye_pos));
-        r.set_projection(get_projection_matrix(45.0, 1.0, 0.1, 50.0));
-        r.draw(pos_id, ind_id, Primitive::Triangle);
-        let image = frame_buffer2cv_mat(&r.frame_buf);
-
-        imshow("image", &image).unwrap();
-
-        k = wait_key(80).unwrap();
-        if k == 'a' as i32 {
-            angle += 10.0;
-        } else if k == 'd' as i32 {
-            angle -= 10.0;
-        }
-    }
+    r.set_model(get_model_matrix(angle));
+    r.set_view(get_view_matrix(eye_pos));
+    r.set_projection(get_projection_matrix(45.0, 1.0, 0.1, 50.0));
+    r.draw(pos_id, ind_id, Primitive::Triangle);
+    create_window(700, 700, r.frame_buf);
 }
