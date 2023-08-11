@@ -6,11 +6,9 @@ pub fn create_window(w: u32, h: u32, frame_buff: Vec<Vec3>) {
     let mut wind = Window::new(100, 100, w as i32, h as i32, "Hello from rust");
 
     wind.draw(move |_| {
-        let mut v8: Vec<u8> = Vec::new();
-        frame_buff.iter().for_each(|v| {
-            v8.push(v.x as u8);
-            v8.push(v.y as u8);
-            v8.push(v.z as u8);
+        let v8 = frame_buff.iter().fold(Vec::<u8>::new(), |mut acc, cur| {
+            acc.append(&mut vec![cur.x as u8, cur.y as u8, cur.z as u8]);
+            acc
         });
         fltk::draw::draw_image(&v8, 0, 0, w as i32, h as i32, fltk::enums::ColorDepth::Rgb8)
             .unwrap();

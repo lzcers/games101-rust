@@ -17,6 +17,4 @@ pub struct Camera {
     ppsition: Vec3,
 }
 
-impl Camera {
-    pub fn set_model_matrix() -> Matrix4<f64> {}
-}
+impl Camera {}
