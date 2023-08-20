@@ -1,6 +1,4 @@
-use super::Triangle;
-use nalgebra::{Matrix4, RowVector4, Vector2, Vector3, Vector4};
-use std::f64::consts::PI;
+use nalgebra::{Matrix4, RowVector4, Vector3, Vector4};
 
 type Vec3 = Vector3<f64>;
 type Vec4 = Vector4<f64>;

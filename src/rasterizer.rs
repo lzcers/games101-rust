@@ -1,6 +1,9 @@
 use std::collections::HashMap;
 
-use crate::utils::{Rgb, Triangle};
+use crate::{
+    camera::Camera,
+    utils::{Rgb, Triangle},
+};
 use nalgebra::{Matrix4, Vector3, Vector4};
 
 type Vec3 = Vector3<f64>;
