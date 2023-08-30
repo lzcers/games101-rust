@@ -54,12 +54,14 @@ impl Rasterizer {
         r.depth_buf.resize((width * height) as usize, 0.0);
         r
     }
+
     pub fn set_view(&mut self, view: Matrix4<f64>) {
         self.view = view;
     }
     pub fn set_model(&mut self, model: Matrix4<f64>) {
         self.model = model;
     }
+
     pub fn set_projection(&mut self, projection: Matrix4<f64>) {
         self.projection = projection;
     }
@@ -67,7 +69,7 @@ impl Rasterizer {
     pub fn set_pixel(
         width: u32,
         height: u32,
-        point: Vec3,
+        point: &Vec3,
         color: &Vec3,
         frame_buf: &mut Vec<Vec3>,
     ) {
@@ -103,62 +105,56 @@ impl Rasterizer {
         let line_color = Vector3::new(255.0, 255.0, 255.0);
         let (x1, y1) = (begin.x, begin.y);
         let (x2, y2) = (end.x, end.y);
-        let (dx, dy) = (x2 - x1, y2 - y1);
-        let (dx1, dy1) = (dx.abs(), dy.abs());
 
-        let mut px = 2.0 * dy1 - dx1;
-        let mut py = 2.0 * dx1 - dy1;
-        if dy <= dx {
-            // 起始点反向画
-            let (mut x, mut y, xe) = if dx >= 0.0 {
-                (x1, y1, x2)
+        let (dx, dy) = (x2 - x1, y2 - y1);
+        // flag 判断是否是斜率大于 1 的情况，此时y = x;
+        let mut draw_call = |x0: f64, y0: f64, x1: f64, y1: f64, flag: bool| {
+            let dx = (x1 - x0) as i64;
+            let dy = (y1 - y0) as i64;
+
+            let mut p = 2 * dy.abs() - dx.abs();
+            let (mut x, mut y, endx) = if dx >= 0 {
+                (x0 as i64, y0 as i64, x1 as i64)
             } else {
-                (x2, y2, x1)
+                (x1 as i64, y1 as i64, x0 as i64)
             };
-            let point = Vec3::new(x1.round(), x2.round(), 1.0);
-            Self::set_pixel(width, height, point, &line_color, frame_buf);
-            while x < xe {
-                x += 1.0;
-                if px < 0.0 {
-                    px += 2.0 * dy1;
+
+            let yd = if (dy >= 0 && dx >= 0) || (dy <= 0 && dx <= 0) {
+                1
+            } else {
+                -1
+            };
+
+            let point = if !flag {
+                Vec3::new(x as f64, y as f64, 1.0)
+            } else {
+                Vec3::new(y as f64, x as f64, 1.0)
+            };
+            Self::set_pixel(width, height, &point, &line_color, frame_buf);
+            while x < endx {
+                x += 1;
+
+                if p < 0 {
+                    p += 2 * dy.abs();
                 } else {
-                    // 算法拓展到负数斜率
-                    if (dy < 0.0 && dx < 0.0) || (dx > 0.0 && dy > 0.0) {
-                        y += 1.0;
-                    } else {
-                        y -= 1.0;
-                    }
-                    px += 2.0 * (dy1 - dx1);
+                    y += yd;
+                    p += 2 * (dy - dx).abs()
                 }
-                let p = Vec3::new(x.round(), y.round(), 1.0);
-                Self::set_pixel(width, height, p, &line_color, frame_buf);
+                let point = if !flag {
+                    Vec3::new(x as f64, y as f64, 1.0)
+                } else {
+                    Vec3::new(y as f64, x as f64, 1.0)
+                };
+                Self::set_pixel(width, height, &point, &line_color, frame_buf);
             }
+        };
+
+        // k 在 [0, 1] 区间
+        if dy.abs() <= dx.abs() {
+            draw_call(x1.round(), y1.round(), x2.round(), y2.round(), false);
         } else {
-            let (mut x, mut y, ye) = if dy >= 0.0 {
-                (x1, y1, y2)
-            } else {
-                (x2, y2, y1)
-            };
-            let point = Vec3::new(x1.round(), x2.round(), 1.0);
-            Self::set_pixel(width, height, point, &line_color, frame_buf);
-            while y < ye {
-                y += 1.0;
-                if py < 0.0 {
-                    py += 2.0 * dx1;
-                } else {
-                    // 算法拓展到负数斜率
-                    if (dy < 0.0 && dx < 0.0) || (dx > 0.0 && dy > 0.0) {
-                        x += 1.0;
-                    } else {
-                        x -= 1.0;
-                    }
-                    py += 2.0 * (dx1 - dy1);
-                }
-                let p = Vec3::new(x.round(), y.round(), 1.0);
-                Self::set_pixel(width, height, p, &line_color, frame_buf);
-            }
+            draw_call(y1.round(), x1.round(), y2.round(), x2.round(), true);
         }
-        // 开始点
     }
 
     pub fn draw(&mut self, pos_id: PosBufId, ind_id: IndBufId, _type: Primitive) {
